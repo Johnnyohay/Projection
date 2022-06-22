@@ -1,7 +1,7 @@
 function loadPage(clicked_id) {
 	let fetchStr = '../html/'
-	if (clicked_id == 'homeButton') {
-		fetchStr += 'homePage.html'
+	if (clicked_id == 'Home') {
+		fetchStr += 'about.html'
 	} else if (clicked_id == 'MyMovies') {
 		fetchStr += 'userMovies.html'
 	} else if (clicked_id == 'AllMovies') {

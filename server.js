@@ -93,6 +93,23 @@ app.use('/userMovies', function(req, res, next){
     })
 })
 
+app.use('/allMovies', function(req, res, next){
+    
+    var options = {
+        root: path.join(__dirname)
+    };
+     
+    var fileName = '/public/html/allMovies.html'
+    res.sendFile(fileName, options, function (err) {
+        if (err) {
+            next(err)
+        } else {
+            console.log('Sent:', fileName)
+            next()
+        }
+    })
+})
+
 // ROUTES
 app.get('/', isLoggedIn, (req, res) => {
 	res.render('homePage.html');
@@ -114,13 +131,35 @@ app.get('/successfulLogin', isLoggedIn, (req, res) => {
 	passportUserInfo.movies.forEach(movie => {
 		list += `<li>${movie}</li>\n`
 	});
-	const content = `<h1>${passportUserInfo.username}'s Movies </h1>
+	let content = `<h1>${passportUserInfo.username}'s Movies </h1>
 	${list}`
 	fs.writeFile(__dirname + '/public/html/userMovies.html', content, err => {
 		if (err) {
 			console.error(err);
 		}
 	});
+
+	(async () => {
+		try{
+			const result = await MongoDB.getAllMovies()
+			let listMovies = ''
+			result.forEach(movie => {
+			listMovies += `<li>${movie}</li>\n`
+			});
+		content = `<h1>All Movies</h1>
+		${listMovies}`
+		fs.writeFile(__dirname + '/public/html/allMovies.html', content, err => {
+			if (err) {
+				console.error(err);
+			}
+		});
+			return result
+		}
+		catch(e){
+			throw e 
+		}
+	  })()
+
 	res.render('successfulLogin.html')
 //	res.render('homePage.html', JSON.stringify(passportUserInfo))
 	//res.render('homePage.html')
