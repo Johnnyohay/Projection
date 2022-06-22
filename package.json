@@ -1,0 +1,33 @@
+{
+  "name": "Movie Picker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^16.0.1",
+    "ejs": "^3.1.8",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "fs": "^0.0.1-security",
+    "mongodb": "^4.7.0",
+    "nodemon": "^2.0.16",
+    "passport": "^0.5.3",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YoavbhGit/WebProjectv2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YoavbhGit/WebProjectv2/issues"
+  },
+  "homepage": "https://github.com/YoavbhGit/WebProjectv2#readme"
+}

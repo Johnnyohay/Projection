@@ -1,0 +1,90 @@
+body {
+  font-family: "proxima-nova", sans-serif;
+  font-size: 16px;
+}
+a {
+    color: inherit;
+    text-decoration: none;
+    
+  }
+
+.left_title {
+  float: left;
+  font-size: 20px;
+}
+
+.ui-panel {
+  margin: 0 auto;
+  margin-top: 120px;
+  width: 360px;
+  height: 300px;
+  background-color: black;
+  color: white;
+  border: 1px solid #161616;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  margin-top: -130px;
+  margin-left: -181px;
+  top: 50%;
+  left: 50%;
+}
+
+header {
+  height: 46px;
+  border-bottom: 1px solid #161616;
+  line-height: 46px;
+  padding: 0 28px;
+  font-size: 0.65em;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+}
+.subtitle {
+    font-size: 0.92em;
+  }
+.login-form {
+  padding: 18px 28px 0 28px;  
+}
+input {
+    font-size: 1.05em;
+    font-weight: 300;
+    margin-top: 18px;
+    padding: 10px 8px;
+    width: 288px;
+  }
+
+#submitRegister {
+    background-color: yellow;
+    color: black;
+    margin: 20px;
+    font-size: 25px;
+    width: 200px;  
+    height: 50px;
+}
+#submitLogin {
+    margin: 20px;
+    font-size: 25px;
+    width: 200px;  
+    height: 50px;
+}
+
+#submitRegister , #submitLogin {
+  display:inline-block;
+  }
+body {
+  width: 100%;
+  height: 100%;
+  background: 161616;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.88);
+}
