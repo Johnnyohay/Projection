@@ -8,9 +8,9 @@ const bcrypt = require('bcrypt');
 //Generic function for DB connection
 
 
-async function connectDB (){
+var db = function connectDB (){
 	console.log("Connecting to DB...")
-	await client.connect()
+	client.connect()
 	var dbo = client.db(MONGO_DB_NAME)
 		if (!dbo) {
 			console.error(`DB Not Found! Failed to Connect`)
@@ -37,9 +37,8 @@ async function disconnectDB (){
 //-------------- DB Actions --------------
 //----------------------------------------
 //Add a user to the Database
-const createUser = async function (username, password,role, movies) {
+const createUser = async function (username, password,role, movies,db) {
 	console.log("Trying to add a user...")
-	const db = await connectDB()
 	var myobj = { username: username, password: password, role: role, movies: movies }
 	try{
 		const collectionUsers = db.collection("Users")
@@ -53,49 +52,96 @@ const createUser = async function (username, password,role, movies) {
 			if(user.username == username && !exist) {
 				console.log("User already exists ")
 				exist = true
-				return
+				return false
 			}
 		})
 		// Add the user if doesn't exist
 		if(!exist){
 			const result = await collectionUsers.insertOne(myobj)
 			console.log(`User: ${username} added`)
+			return true
 		}
 	}
 	catch(e){
 		console.log('Failed to add user')
-		disconnectDB()
+		throw e
+	}
+}
+
+const removeUser = async function (username, db) {
+	console.log("Trying to remove a user...")
+	var myobj = { username: username }
+	try{
+		const collectionUsers = db.collection("Users")
+		const allUsers = collectionUsers.find();
+		// Execute the each command, triggers for each document
+		await allUsers.forEach(function(user) {
+			// If the user already exist then do nothing else add
+			if(user.username == username) {
+				const result = collectionUsers.deleteOne(myobj)
+				console.log(`User: ${username} deleted`)
+				return true
+			}
+		})
+		return false
+	}
+	catch(e){
+		console.log('Failed to add user')
+		throw e
+	}
+}
+
+const addMovie = async function (movie, db) {
+	console.log("Trying to add a movie...")
+	var myobj = { name: movie }
+	try{
+		const collectionMovies = db.collection("Movies")
+		const allMovies = collectionMovies.find();
+		let exist = false
+		// Execute the each command, triggers for each document
+		await allMovies.forEach(function(movie) {
+			
+			// If the user already exist then do nothing else add
+			if(movie.name == movie && !exist) {
+				console.log("Movie already exists ")
+				exist = true
+				return false
+			}
+		})
+		// Add the user if doesn't exist
+		if(!exist){
+			const result = await collectionMovies.insertOne(myobj)
+			console.log(`Movie: ${movie} added`)
+			return true
+		}
+	}
+	catch(e){
+		console.log('Failed to add user')
 		throw e
 	}
 }
 
 const findUserById = async function (id) {
 	console.log("Trying to Find user by Id...")
-	const db = await connectDB()
-	var myobj
 	try{
 		const collectionUsers = db.collection("Users")
 		collectionUsers.findOne({_id: id}, function (err, user) {
-			disconnectDB()
 			return user
 		  })
 	}
 	catch(e){
 		console.log(`Failed to Find user with the following id : ${id}`)
-		disconnectDB()
 		throw e
 	}
 }
 
-const findUserByName = async function (username, password, done) {
+const findUserByName = async function (username, password, done, db) {
 	console.log("Trying to Find user by name...")
-	const db = await connectDB()
 	try{
 		const collectionUsers = db.collection("Users")
 		collectionUsers.findOne({username: username}, function (err, user) {
 			if (err) throw "Error"
 			if (!user) {
-				disconnectDB()
 				console.log(`Failed to Find user with the following username : ${username}`)
 				return done(null, false, { message: 'Incorrect username.' })
 			}
@@ -119,14 +165,12 @@ const findUserByName = async function (username, password, done) {
 	}
 	catch(e){
 		console.log("Catched an Error")
-		disconnectDB()
 		throw e;
 	}
 }
 
-const doesUserExist = async function (username, password) {
+const doesUserExist = async function (username, password,db) {
 	console.log("Trying to find if user exists...")
-	const db = await connectDB()
 	try{
 		const collectionUsers = db.collection("Users")
 
@@ -139,26 +183,22 @@ const doesUserExist = async function (username, password) {
 			if(user.username == username && !exist) {
 				console.log("User already exists ")
 				exist = true
-				disconnectDB()
 				return exist
 			}
 		})
 		// Add the user if doesn't exist
 		if(!exist){
-			disconnectDB()
 			return exist
 		}
 	}
 	catch(e){
 		console.log('Failed to add user')
-		disconnectDB()
 		throw e
 	}
 }
 
-const getAllMovies = async function () {
-	console.log("Geting All Movies...")
-	const db = await connectDB()
+const getAllMovies = async function (db) {
+	console.log("Getting All Movies...")
 	try{
 		const collectionMovies = db.collection("Movies")
 
@@ -169,14 +209,31 @@ const getAllMovies = async function () {
 			movieArr.push(movie.name)
 		})
 		// Add the user if doesn't exist
-		disconnectDB()
 		return movieArr
 	}
 	catch(e){
-		console.log('Failed to add user')
-		disconnectDB()
+		console.log('Failed to get movies')
 		throw e
 	}
 }
 
-module.exports = { createUser, findUserById, findUserByName , doesUserExist, getAllMovies}
+const getAllUsers = async function (db) {
+	console.log("Getting All Users...")
+	try{
+		const collectionUsers = db.collection("Users")
+
+		const allUsers = collectionUsers.find();
+		let usersArr = []
+		// Execute the each command, triggers for each document
+		await allUsers.forEach(function(user) {
+			usersArr.push(user.username)
+		})
+		// Add the user if doesn't exist
+		return usersArr
+	}
+	catch(e){
+		console.log('Failed to get users')
+		throw e
+	}
+}
+module.exports = {db, createUser, removeUser, addMovie, findUserById, findUserByName , doesUserExist, getAllMovies, getAllUsers}

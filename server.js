@@ -12,6 +12,22 @@ const fs 				= require('fs');
 
 // Middleware
 
+
+var db = (() => {
+	try{
+		var dbo = MongoDB.db()
+		app.listen(3000, () => {
+			console.log('http://localhost:3000');
+		});
+		updateUsers(dbo)
+		updateMovies(dbo)
+
+		return dbo
+	}
+	catch(e){
+		throw e
+	}
+})()
 app.use(express.static('public'))
 app.set('views', path.join(__dirname, 'public/html'));
 app.engine('html', require('ejs').renderFile);
@@ -35,8 +51,8 @@ passport.serializeUser((user, done) => {
   });
 
 passport.deserializeUser((user, done) => {
-	console.log("deserializing the user")
-	console.log("deserializing user: " + user.username)
+	// console.log("deserializing the user")
+	// console.log("deserializing user: " + user.username)
 	done(null, user);
   });
 
@@ -45,7 +61,7 @@ passport.use(new localStrategy(function (username, password, done) {
 	console.log("initiate passport's localStrategy")
 	var isDone = (async (username, password, done) => {
 		try{
-		const result = await MongoDB.findUserByName(username, password, done)
+		const result = await MongoDB.findUserByName(username, password, done, db)
 		return result
 		}
 		catch(e){
@@ -66,39 +82,47 @@ function isLoggedOut(req, res, next) {
 	res.render('homePage.html');
 }
 
-app.use('/userMovies', function(req, res, next){
-    
-    var options = {
-        root: path.join(__dirname)
-    };
-     
-    var fileName = '/public/html/userMovies.html'
-    res.sendFile(fileName, options, function (err) {
-        if (err) {
-            next(err)
-        } else {
-            console.log('Sent:', fileName)
-            next()
-        }
-    })
-})
+async function updateMovies(db){
+	try{
+		const movieArr = await MongoDB.getAllMovies(db)
+		let listMovies = ''
+		movieArr.forEach(movie => {
+		listMovies += `<li>${movie}</li>\n`
+		});
+	content = `<h1>All Movies</h1>
+	${listMovies}`
+	fs.writeFile(__dirname + '/public/html/allMovies.html', content, err => {
+		if (err) {
+			console.error(err);
+		}
+	});
+		return movieArr
+	}
+	catch(e){
+		throw e 
+	}
+  }
 
-app.use('/allMovies', function(req, res, next){
-    
-    var options = {
-        root: path.join(__dirname)
-    };
-     
-    var fileName = '/public/html/allMovies.html'
-    res.sendFile(fileName, options, function (err) {
-        if (err) {
-            next(err)
-        } else {
-            console.log('Sent:', fileName)
-            next()
-        }
-    })
-})
+  async function updateUsers(db){
+	try{
+		const userArr = await MongoDB.getAllUsers(db)
+		let listUsers = ''
+		userArr.forEach(user => {
+			listUsers += `<li>${user}</li>\n`
+		})
+	content = `<h1>All Users</h1>
+	${listUsers}`
+	fs.writeFile(__dirname + '/public/html/allUsers.html', content, err => {
+		if (err) {
+			console.error(err);
+		}
+	});
+		return userArr
+	}
+	catch(e){
+		throw e 
+	}
+  }
 
 // ROUTES
 app.get('/', isLoggedIn, (req, res) => {
@@ -112,53 +136,96 @@ app.get('/login', isLoggedOut, (req, res) => {
 app.get('/about', isLoggedIn, (req, res) => {
 	res.render('/index.html');
 });
+
+app.get('/homepage',isLoggedIn, (req, res) => {
+	res.render('homePage.html')
+});
+
+app.get('/addUser',isLoggedIn, (req, res) => {
+	res.render('homePage.html')
+});
+
+app.get('/removeUser',isLoggedIn, (req, res) => {
+	res.render('homePage.html')
+});
+
+app.get('/addMovie',isLoggedIn, (req, res) => {
+	res.render('homePage.html')
+});
+
 app.get('/successfulLogin', isLoggedIn, (req, res) => {
 	let sessionId = res.socket.parser.incoming.sessionID
 	let sessionInfo = res.socket.parser.incoming.sessionStore.sessions[sessionId]
 	let passportUserInfo = JSON.parse(sessionInfo).passport.user
 	//console.log(passportUserInfo.movies)
-	let listUserMovie = ''
+	let list = ''
 	passportUserInfo.movies.forEach(movie => {
-		listUserMovie += `<li>${movie}</li>\n`
+		list += `<li>${movie}</li>\n`
 	});
 	let content = `<h1>${passportUserInfo.username}'s Movies </h1>
-	${listUserMovie}`
+	${list}`
 	fs.writeFile(__dirname + '/public/html/userMovies.html', content, err => {
 		if (err) {
 			console.error(err);
 		}
 	});
 
+	res.render('successfulLogin.html')
+});
+
+app.post('/addUser', isLoggedIn, (req, res) => {
 	(async () => {
 		try{
-			const result = await MongoDB.getAllMovies()
-			let listMovies = ''
-			result.forEach(movie => {
-			listMovies += `<li>${movie}</li>\n`
-			});
-		content = `<h1>All Movies</h1>
-		${listMovies}`
-		fs.writeFile(__dirname + '/public/html/allMovies.html', content, err => {
-			if (err) {
-				console.error(err);
+			username = req.body.username
+			password = req.body.password
+			role = 'user'
+			movies = []
+			const createUser = await MongoDB.createUser(username, password,role, movies,db)
+			updateUsers(db)
+			//if user was added 'createUser' is set to true
+			if(createUser){
+				//ALERT
 			}
-		});
-			return result
 		}
 		catch(e){
 			throw e 
 		}
-	  })()
-
-	res.render('successfulLogin.html')
-//	res.render('homePage.html', JSON.stringify(passportUserInfo))
-	//res.render('homePage.html')
+	  })();
 });
 
-app.get('/homepage',isLoggedIn, (req, res) => {
-	res.render('homePage.html')
+app.post('/removeUser', isLoggedIn, (req, res) => {
+	(async () => {
+		try{
+			username = req.body.username
+			const removeUser = await MongoDB.removeUser(username, db)
+			updateUsers(db)
+			//if user was added 'removeUser' is set to true
+			if(removeUser){
+				//ALERT
+			}
+		}
+		catch(e){
+			throw e 
+		}
+	  })();
 });
 
+app.post('/addMovie', isLoggedIn, (req, res) => {
+	(async () => {
+		try{
+			movie = req.body["Movie Name"]
+			const addMovie = await MongoDB.addMovie(movie, db)
+			updateMovies(db)
+			//if user was added 'addMovie' is set to true
+			if(addMovie){
+				//ALERT
+			}
+		}
+		catch(e){
+			throw e 
+		}
+	  })();
+});
 
 
 app.post('/login', passport.authenticate('local', {
@@ -171,10 +238,7 @@ app.get('/logout', function (req, res) {
 	res.redirect('/');
 });
 
-app.listen(3000, () => {
-	console.log("http://localhost:3000 istening on port 3000");
-});
-
+		
 
 // const getCircularReplacer = () => {
 //     const seen = new WeakSet();
