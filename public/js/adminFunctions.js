@@ -38,25 +38,25 @@ function loadPage(clicked_id) {
 		})
 }
 
-function login() {
-	let myForm = document.getElementById('login_Form')
+// function login() {
+// 	let myForm = document.getElementById('login_Form')
 
-	myForm.addEventListener('submit', function (e) {
-		e.preventDefault()
+// 	myForm.addEventListener('submit', function (e) {
+// 		e.preventDefault()
 
-		const formData = new FormData(this)
+// 		const formData = new FormData(this)
 
-		fetch('homePage.html', {
-			method: 'post',
-			body: formData,
-		})
-			.then(function (response) {
-				return response.text()
-			})
-			.then(function (text) {
-				console.log(text)
-			})
-	})
-}
+// 		fetch('homePage.html', {
+// 			method: 'post',
+// 			body: formData,
+// 		})
+// 			.then(function (response) {
+// 				return response.text()
+// 			})
+// 			.then(function (text) {
+// 				console.log(text)
+// 			})
+// 	})
+// }
 
 // module.exports = loadPage

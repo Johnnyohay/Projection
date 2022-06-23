@@ -73,13 +73,16 @@ passport.use(new localStrategy(function (username, password, done) {
 
 function isLoggedIn(req, res, next) {
 	console.log("authenticated: " + req.isAuthenticated())
-	if (req.isAuthenticated()) return next();
+	if (req.isAuthenticated()){
+		console.log("User Role: " + userInfo(res).role)
+		return next();
+	} 
 	res.render('login');
 }
 
 function isLoggedOut(req, res, next) {
 	if (!req.isAuthenticated()) return next();
-	res.render('homePage.html');
+	res.render('adminHomePage.html');
 }
 
 async function updateMovies(db){
@@ -124,39 +127,66 @@ async function updateMovies(db){
 	}
   }
 
+  var userInfo = function LoggedUserInfo(res){
+	let sessionId = res.socket.parser.incoming.sessionID
+	let sessionInfo = res.socket.parser.incoming.sessionStore.sessions[sessionId]
+	let passportUserInfo = JSON.parse(sessionInfo).passport.user
+	return passportUserInfo
+  }
+
 // ROUTES
 app.get('/', isLoggedIn, (req, res) => {
-	res.render('homePage.html');
+	
+	if(userInfo(res).role == 'admin'){
+		res.render('adminHomePage.html')
+	}
+	else{
+		res.render('userHomePage.html')
+	}	
 });
 
 app.get('/login', isLoggedOut, (req, res) => {
 	res.render('login');
 });
 
-app.get('/about', isLoggedIn, (req, res) => {
-	res.render('/index.html');
-});
-
-app.get('/homepage',isLoggedIn, (req, res) => {
-	res.render('homePage.html')
+app.get('/homePage',isLoggedIn, (req, res) => {
+	if(userInfo(res).role == 'admin'){
+		res.render('adminHomePage.html')
+	}
+	else{
+		res.render('userHomePage.html')
+	}	
 });
 
 app.get('/addUser',isLoggedIn, (req, res) => {
-	res.render('homePage.html')
+	if(uuserInfo(res).role == 'admin'){
+		res.render('adminHomePage.html')
+	}
+	else{
+		res.render('userHomePage.html')
+	}	
 });
 
 app.get('/removeUser',isLoggedIn, (req, res) => {
-	res.render('homePage.html')
+	if(userInfo(res).role == 'admin'){
+		res.render('adminHomePage.html')
+	}
+	else{
+		res.render('userHomePage.html')
+	}	
 });
 
 app.get('/addMovie',isLoggedIn, (req, res) => {
-	res.render('homePage.html')
+	if(userInfo(res).role == 'admin'){
+		res.render('adminHomePage.html')
+	}
+	else{
+		res.render('userHomePage.html')
+	}	
 });
 
 app.get('/successfulLogin', isLoggedIn, (req, res) => {
-	let sessionId = res.socket.parser.incoming.sessionID
-	let sessionInfo = res.socket.parser.incoming.sessionStore.sessions[sessionId]
-	let passportUserInfo = JSON.parse(sessionInfo).passport.user
+	var passportUserInfo = userInfo(res)
 	//console.log(passportUserInfo.movies)
 	let list = ''
 	passportUserInfo.movies.forEach(movie => {
@@ -169,8 +199,13 @@ app.get('/successfulLogin', isLoggedIn, (req, res) => {
 			console.error(err);
 		}
 	});
-
-	res.render('successfulLogin.html')
+	if(passportUserInfo.role == 'admin'){
+		res.render('adminSuccessfulLogin.html')
+	}
+	else{
+		res.render('userSuccessfulLogin.html')
+	}	
+	
 });
 
 app.post('/addUser', isLoggedIn, (req, res) => {
