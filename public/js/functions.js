@@ -7,6 +7,27 @@ function loadPage(clicked_id) {
 	} else if (clicked_id == 'AllMovies') {
 		fetchStr += 'allMovies.html'
 	}
+	else if (clicked_id == 'AddUser') {
+		fetchStr += 'AddUser.html'
+	}
+	else if (clicked_id == 'RemoveUser') {
+		fetchStr += 'RemoveUser.html'
+	}
+	else if (clicked_id == 'AddMovie') {
+		fetchStr += 'addMovie.html'
+	}
+	else if (clicked_id == 'AllUsers') {
+		fetchStr += 'AllUsers.html'
+	}
+	else if (clicked_id == 'addUserButton') {
+		fetchStr += 'AddUser.html'
+	}
+	else if (clicked_id == 'removeUserButton') {
+		fetchStr += 'removeUser.html'
+	}
+	else if (clicked_id == 'addMovieButton') {
+		fetchStr += 'addMovie.html'
+	}
 
 	fetch(fetchStr)
 		.then(function (response) {
