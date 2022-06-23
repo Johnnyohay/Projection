@@ -8,28 +8,21 @@
 </head>
 <body>
 	<div class="app">
-		<form action="/addMovie" method="post">
+		<form action="/pickMovie" method="post">
       <div>
-        <h1>Add Movie</h1>
+        <h1>Pick a Movie</h1>
       </div>
       <div class="form-group">
-        <label>New Movie: </label>
+        <label>Selected Movie: </label>
         <input 
           type="text" 
           name="Movie Name" 
           id="MovieName" 
           placeholder="Enter a new Movie" 
-          required />
-          <label>Genre: </label>
-          <input 
-          type="text" 
-          name="Genre" 
-          id="genre" 
-          placeholder="Enter Genre" 
-          required />
+          required='yes'/>
       </div>
       <div>
-        <input type="submit" id="addMovieButton" onclick="loadPage(this.id)" value="Add Movie" />
+        <input type="submit" id="orderMovieButton" onclick="loadPage(this.id)" value="Order Movie" />
       </div>
     </form>
 	</div>

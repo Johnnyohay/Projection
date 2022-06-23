@@ -7,17 +7,8 @@ function loadPage(clicked_id) {
 	} else if (clicked_id == 'AllMovies') {
 		fetchStr += 'allMovies.html'
 	}
-	else if (clicked_id == 'AddUser') {
-		fetchStr += 'AddUser.html'
-	}
-	else if (clicked_id == 'RemoveUser') {
-		fetchStr += 'RemoveUser.html'
-	}
-	else if (clicked_id == 'AddMovie') {
-		fetchStr += 'addMovie.html'
-	}
-	else if (clicked_id == 'AllUsers') {
-		fetchStr += 'AllUsers.html'
+	else if (clicked_id == 'orderMovieButton') {
+		fetchStr += 'orderMovie.html'
 	}
 	else if (clicked_id == 'addUserButton') {
 		fetchStr += 'AddUser.html'
@@ -37,6 +28,26 @@ function loadPage(clicked_id) {
 			document.getElementById('renderPage').innerHTML = html
 		})
 }
+
+function searchMovie() {
+    // Declare variables
+    var input, filter, ul, li,a, i, txtValue;
+    input = document.getElementById('movieSearch');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("myUL");
+    li = ul.getElementsByTagName('li');
+  
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+      a = li[i].getElementsByTagName("a")[0];
+      txtValue = a.textContent || a.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        li[i].style.display = "";
+      } else {
+        li[i].style.display = "none";
+      }
+    }
+  }
 
 // function login() {
 // 	let myForm = document.getElementById('login_Form')

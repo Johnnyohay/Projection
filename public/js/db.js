@@ -7,6 +7,16 @@ const bcrypt = require('bcrypt');
 
 //Generic function for DB connection
 
+function getDate() {
+
+	var now = new Date();
+  
+	var year = now.getFullYear();
+	var month = now.getMonth() + 1;
+	var date = now.getDate();
+  
+	return year + "-" + month + "-" + date + "T00:00:00.000+00:00";
+}
 
 var db = function connectDB (){
 	console.log("Connecting to DB...")
@@ -91,9 +101,9 @@ const removeUser = async function (username, db) {
 	}
 }
 
-const addMovie = async function (movie, db) {
+const addMovie = async function (movie,genre, db) {
 	console.log("Trying to add a movie...")
-	var myobj = { name: movie }
+	var myobj = { name: movie, Genre: genre}
 	try{
 		const collectionMovies = db.collection("Movies")
 		const allMovies = collectionMovies.find();
@@ -206,7 +216,7 @@ const getAllMovies = async function (db) {
 		let movieArr = []
 		// Execute the each command, triggers for each document
 		await allMovies.forEach(function(movie) {
-			movieArr.push(movie.name)
+			movieArr.push(movie)
 		})
 		// Add the user if doesn't exist
 		return movieArr
@@ -236,4 +246,52 @@ const getAllUsers = async function (db) {
 		throw e
 	}
 }
-module.exports = {db, createUser, removeUser, addMovie, findUserById, findUserByName , doesUserExist, getAllMovies, getAllUsers}
+
+const InsertOrder = async function (movie,user, db) {
+	console.log("Inserting Order...")
+	orderDate = getDate()
+	myobjOrders = { MovieName: movie, OrderDate: orderDate, user: user}
+	myobjMovie = { MovieName: movie, OrderDate: orderDate}
+	try{
+		//-------------------------Check if Movie Exists-------------------------------
+
+		const collectionMovies = db.collection("Movies")
+		const allMovies = collectionMovies.find();
+		let exist = false
+		// Execute the each command, triggers for each document
+		await allMovies.forEach(function(movie) {
+			
+			// If the user already exist then do nothing else add
+			if(movie.name == movie) {
+				exist = true
+			}
+
+			
+		})
+		//--------------------------------------------------------------
+		if(exist){
+			
+			const collectionOrders = db.collection("Orders")
+
+			const orders = await collectionOrders.insertOne(myobjOrders);
+
+			const collectionUsers = db.collection("Users")
+
+			let userid = await collectionUsers.findOne({username: user})
+			const users = await collectionUsers.updateOne({ _id: userid._id },
+				{ $push: {movies: myobjMovie} });
+
+			console.log(`Movie: ${movie} Ordered`)
+		}
+		else{
+			console.log("Movie doesn't exist, Can't order")
+			//Alert
+		}
+	}
+	catch(e){
+		console.log('Failed to insert order')
+		throw e
+	}
+}
+
+module.exports = {db, createUser, removeUser, addMovie, InsertOrder, findUserById, findUserByName , doesUserExist, getAllMovies, getAllUsers}

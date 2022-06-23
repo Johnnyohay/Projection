@@ -90,10 +90,15 @@ async function updateMovies(db){
 		const movieArr = await MongoDB.getAllMovies(db)
 		let listMovies = ''
 		movieArr.forEach(movie => {
-		listMovies += `<li>${movie}</li>\n`
+		listMovies += `<li>${movie.name} - <a>${movie.Genre}</a> <input type="submit" id="orderMovieButton" onclick="loadPage(this.id)" value="Order"/></li>\n`
 		});
-	content = `<h1>All Movies</h1>
-	${listMovies}`
+	content = `<script src="../js/userFunctions.js"></script>
+	<link rel="stylesheet" href="../css/allMovies.css">
+	<h1>All Movies</h1>
+	<input type="text" id="movieSearch" onkeyup="searchMovie()" placeholder="Search for Movie..">
+	<ul id="myUL">
+	${listMovies}
+	</ul>`
 	fs.writeFile(__dirname + '/public/html/allMovies.html', content, err => {
 		if (err) {
 			console.error(err);
@@ -105,8 +110,28 @@ async function updateMovies(db){
 		throw e 
 	}
   }
-
   async function updateUsers(db){
+	try{
+		const userArr = await MongoDB.getAllUsers(db)
+		let listUsers = ''
+		userArr.forEach(user => {
+			listUsers += `<li>${user}</li>\n`
+		})
+	content = `<h1>All Users</h1>
+	${listUsers}`
+	fs.writeFile(__dirname + '/public/html/allUsers.html', content, err => {
+		if (err) {
+			console.error(err);
+		}
+	});
+		return userArr
+	}
+	catch(e){
+		throw e 
+	}
+  }
+
+  async function updateOrders(db){
 	try{
 		const userArr = await MongoDB.getAllUsers(db)
 		let listUsers = ''
@@ -185,12 +210,21 @@ app.get('/addMovie',isLoggedIn, (req, res) => {
 	}	
 });
 
+app.get('/pickMovie',isLoggedIn, (req, res) => {
+	if(userInfo(res).role == 'admin'){
+		res.render('adminHomePage.html')
+	}
+	else{
+		res.render('userHomePage.html')
+	}	
+});
+
 app.get('/successfulLogin', isLoggedIn, (req, res) => {
 	var passportUserInfo = userInfo(res)
 	//console.log(passportUserInfo.movies)
 	let list = ''
 	passportUserInfo.movies.forEach(movie => {
-		list += `<li>${movie}</li>\n`
+		list += `<li>${movie.MovieName} - ${movie.OrderDate}</li>\n`
 	});
 	let content = `<h1>${passportUserInfo.username}'s Movies </h1>
 	${list}`
@@ -249,7 +283,8 @@ app.post('/addMovie', isLoggedIn, (req, res) => {
 	(async () => {
 		try{
 			movie = req.body["Movie Name"]
-			const addMovie = await MongoDB.addMovie(movie, db)
+			genre = req.body["Genre"]
+			const addMovie = await MongoDB.addMovie(movie,genre, db)
 			updateMovies(db)
 			//if user was added 'addMovie' is set to true
 			if(addMovie){
@@ -260,6 +295,23 @@ app.post('/addMovie', isLoggedIn, (req, res) => {
 			throw e 
 		}
 	  })();
+});
+
+app.post('/pickMovie', isLoggedIn, (req, res) => {
+	(async () => {
+		try{
+			let user = userInfo(res).username
+			movie = req.body["Movie Name"]
+			const insertMovie = await MongoDB.InsertOrder(movie, user, db)
+			//if user was added 'addMovie' is set to true
+			if(insertMovie){
+				//ALERT
+			}
+		}
+		catch(e){
+			throw e 
+		}
+	})()
 });
 
 
