@@ -12,16 +12,6 @@ const fs 				= require('fs');
 
 // Middleware
 
-
-// (async () => {
-// 	try{
-// 		var db = await MongoDB.connectDB()
-// 		return
-// 	}
-// 	catch(e){
-// 		done(e)
-// 	}
-// })()
 app.use(express.static('public'))
 app.set('views', path.join(__dirname, 'public/html'));
 app.engine('html', require('ejs').renderFile);
@@ -93,6 +83,23 @@ app.use('/userMovies', function(req, res, next){
     })
 })
 
+app.use('/allMovies', function(req, res, next){
+    
+    var options = {
+        root: path.join(__dirname)
+    };
+     
+    var fileName = '/public/html/allMovies.html'
+    res.sendFile(fileName, options, function (err) {
+        if (err) {
+            next(err)
+        } else {
+            console.log('Sent:', fileName)
+            next()
+        }
+    })
+})
+
 // ROUTES
 app.get('/', isLoggedIn, (req, res) => {
 	res.render('homePage.html');
@@ -110,17 +117,39 @@ app.get('/successfulLogin', isLoggedIn, (req, res) => {
 	let sessionInfo = res.socket.parser.incoming.sessionStore.sessions[sessionId]
 	let passportUserInfo = JSON.parse(sessionInfo).passport.user
 	//console.log(passportUserInfo.movies)
-	let list = ''
+	let listUserMovie = ''
 	passportUserInfo.movies.forEach(movie => {
-		list += `<li>${movie}</li>\n`
+		listUserMovie += `<li>${movie}</li>\n`
 	});
-	const content = `<h1>${passportUserInfo.username}'s Movies </h1>
-	${list}`
+	let content = `<h1>${passportUserInfo.username}'s Movies </h1>
+	${listUserMovie}`
 	fs.writeFile(__dirname + '/public/html/userMovies.html', content, err => {
 		if (err) {
 			console.error(err);
 		}
 	});
+
+	(async () => {
+		try{
+			const result = await MongoDB.getAllMovies()
+			let listMovies = ''
+			result.forEach(movie => {
+			listMovies += `<li>${movie}</li>\n`
+			});
+		content = `<h1>All Movies</h1>
+		${listMovies}`
+		fs.writeFile(__dirname + '/public/html/allMovies.html', content, err => {
+			if (err) {
+				console.error(err);
+			}
+		});
+			return result
+		}
+		catch(e){
+			throw e 
+		}
+	  })()
+
 	res.render('successfulLogin.html')
 //	res.render('homePage.html', JSON.stringify(passportUserInfo))
 	//res.render('homePage.html')
@@ -142,41 +171,10 @@ app.get('/logout', function (req, res) {
 	res.redirect('/');
 });
 
-		app.listen(3000, () => {
-			console.log('http://localhost:3000');
-		});
+app.listen(3000, () => {
+	console.log("http://localhost:3000 istening on port 3000");
+});
 
-// Setup our admin user
-// app.get('/setup', async (req, res) => {
-// 	const exists = (async (username, password) => {
-// 		const result = await MongoDB.doesUserExist(username, password)
-// 		return result
-// 	  })("admin", "123")
-// 	if (exists) {
-// 		res.redirect('/login');
-// 		return;
-// 	};
-
-// 	bcrypt.genSalt(10, function (err, salt) {
-// 		if (err) return next(err);
-// 		bcrypt.hash("pass", salt, function (err, hash) {
-// 			if (err) return next(err);
-			
-// 			const newAdmin = {
-// 				"username": "admin",
-// 				"password": hash,
-// 				"role": "admin",
-// 				"movies": Array
-// 			};
-// 			const exists = (async (username, password,role,movies) => {
-// 				const result = await MongoDB.createUser(username, password)
-// 				return result
-// 			  })(newAdmin.username,newAdmin.password,newAdmin.role,newAdmin.movies)
-
-// 			res.redirect('/login');
-// 		});
-// 	});
-// });
 
 // const getCircularReplacer = () => {
 //     const seen = new WeakSet();

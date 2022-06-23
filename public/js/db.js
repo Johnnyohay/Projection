@@ -127,7 +127,6 @@ const findUserByName = async function (username, password, done) {
 const doesUserExist = async function (username, password) {
 	console.log("Trying to find if user exists...")
 	const db = await connectDB()
-	var myobj = { username: username, password: password }
 	try{
 		const collectionUsers = db.collection("Users")
 
@@ -156,4 +155,28 @@ const doesUserExist = async function (username, password) {
 		throw e
 	}
 }
-module.exports = { createUser, findUserById, findUserByName , doesUserExist}
+
+const getAllMovies = async function () {
+	console.log("Geting All Movies...")
+	const db = await connectDB()
+	try{
+		const collectionMovies = db.collection("Movies")
+
+		const allMovies = collectionMovies.find();
+		let movieArr = []
+		// Execute the each command, triggers for each document
+		await allMovies.forEach(function(movie) {
+			movieArr.push(movie.name)
+		})
+		// Add the user if doesn't exist
+		disconnectDB()
+		return movieArr
+	}
+	catch(e){
+		console.log('Failed to add user')
+		disconnectDB()
+		throw e
+	}
+}
+
+module.exports = { createUser, findUserById, findUserByName , doesUserExist, getAllMovies}
