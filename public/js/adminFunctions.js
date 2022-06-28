@@ -35,6 +35,15 @@ function loadPage(clicked_id) {
 		})
 		.then(function (html) {
 			document.getElementById('renderPage').innerHTML = html
+			if (clicked_id == 'MyMovies'){
+				console.log("im here")
+				showTable();
+				
+			}
+			else {
+				document.getElementById("myData").innerHTML.text = ''
+			}
+
 		})
 }
 
@@ -59,5 +68,28 @@ function searchMovie() {
   }
 }
 
+const showTable = async function ()  {
+	fetch('/getMovies')
+		.then(response => response.text())
+		.then(data => {
+			var movieIMg = JSON.parse(data);
+			var myTables = "";
+			movieIMg.forEach(element => {
+
+				myTables += `
+					<table class="styled-table">
+						<tr>							  
+							<td>
+								<img src="${element.image}" alt="shuld be image here" width="150" height="120">      
+							</td>
+						</tr>
+						</table>
+					`
+
+			});
+			document.getElementById("renderPage").innerHTML = myTables
+		}
+		)
+}
 
 // module.exports = loadPage

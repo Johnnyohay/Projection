@@ -10,6 +10,8 @@ const fs 				= require('fs');
 
 
 
+
+
 // Middleware
 
 
@@ -324,6 +326,24 @@ app.get('/logout', function (req, res) {
 	req.logout();
 	res.redirect('/');
 });
+
+
+
+
+// getting all the collection of movies, to have all the movies parsed in JSON prepared for manipulations
+app.get('/getMovies', (req, res) => {
+
+    async function myMovies() {
+      await MongoDB.getMoviesCollection().then((result) => {
+		console.log(result);
+		res.send(result)});
+    }
+    myMovies();
+  })
+
+// function showTable(){
+// 	MongoDB.showTable();
+// }
 
 		
 

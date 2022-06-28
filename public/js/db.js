@@ -294,4 +294,43 @@ const InsertOrder = async function (movie,user, db) {
 	}
 }
 
-module.exports = {db, createUser, removeUser, addMovie, InsertOrder, findUserById, findUserByName , doesUserExist, getAllMovies, getAllUsers}
+//function to get all the collection in JSON, parsed:
+
+async function getMoviesCollection(){  
+    await client.connect();
+    const db = client.db("myimdb");
+    let collection = db.collection('Movies');
+	let res = await collection.find({}).toArray();
+    return res;
+    
+  }
+
+const showTable = async function ()  {
+	  fetch('/getMovies')
+		  .then(response => response.text())
+		  .then(data => {
+			  var movieIMg = JSON.parse(data);
+			  var myTables = "";
+			  movieIMg.forEach(element => {
+
+				  myTables += `
+					  <table class="styled-table">
+						  <tr>							  
+							  <td>
+								  <img src="${element.image}" alt="${element.image}" width="150" height="120">      
+							  </td>
+						  </tr>
+						  </table>
+					  `
+
+			  });
+			  document.getElementById("myData").innerHTML = myTables
+		  }
+		  )
+  }
+
+
+
+
+
+module.exports = {db, createUser, removeUser, addMovie, InsertOrder, findUserById, findUserByName , doesUserExist, getAllMovies, getAllUsers,showTable, getMoviesCollection}

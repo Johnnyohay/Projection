@@ -26,6 +26,15 @@ function loadPage(clicked_id) {
 		})
 		.then(function (html) {
 			document.getElementById('renderPage').innerHTML = html
+			if (clicked_id == 'userMovies.html'){
+				console.log("im not admin")
+				db.showTable()
+				
+			}
+			else {
+				document.getElementById("myData").innerHTML = ''
+			}
+
 		})
 }
 
