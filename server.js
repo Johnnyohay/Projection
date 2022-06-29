@@ -3,16 +3,10 @@ const session			= require('express-session');
 const MongoDB 			= require('./public/js/db')
 const passport			= require('passport');
 const localStrategy		= require('passport-local').Strategy;
-const bcrypt			= require('bcrypt');
 const path 				= require("path");
 const app				= express();
-const fs 				= require('fs');
 
 
-
-
-
-// Middleware
 
 
 var db = (() => {
@@ -21,9 +15,6 @@ var db = (() => {
 		app.listen(3000, () => {
 			console.log('http://localhost:3000');
 		});
-		updateUsers(dbo)
-		updateMovies(dbo)
-
 		return dbo
 	}
 	catch(e){
@@ -53,15 +44,13 @@ passport.serializeUser((user, done) => {
   });
 
 passport.deserializeUser((user, done) => {
-	// console.log("deserializing the user")
-	// console.log("deserializing user: " + user.username)
 	done(null, user);
   });
 
 
 passport.use(new localStrategy(function (username, password, done) {
 	console.log("initiate passport's localStrategy")
-	var isDone = (async (username, password, done) => {
+	let isDone = (async (username, password, done) => {
 		try{
 		const result = await MongoDB.findUserByName(username, password, done, db)
 		return result
@@ -86,73 +75,6 @@ function isLoggedOut(req, res, next) {
 	if (!req.isAuthenticated()) return next();
 	res.render('adminHomePage.html');
 }
-
-async function updateMovies(db){
-	try{
-		const movieArr = await MongoDB.getAllMovies(db)
-		let listMovies = ''
-		movieArr.forEach(movie => {
-		listMovies += `<li>${movie.name} - <a>${movie.Genre}</a> <input type="submit" id="orderMovieButton" onclick="loadPage(this.id)" value="Order"/></li>\n`
-		});
-	content = `<script src="../js/userFunctions.js"></script>
-	<link rel="stylesheet" href="../css/allMovies.css">
-	<h1>All Movies</h1>
-	<input type="text" id="movieSearch" onkeyup="searchMovie()" placeholder="Search for Movie..">
-	<ul id="myUL">
-	${listMovies}
-	</ul>`
-	fs.writeFile(__dirname + '/public/html/allMovies.html', content, err => {
-		if (err) {
-			console.error(err);
-		}
-	});
-		return movieArr
-	}
-	catch(e){
-		throw e 
-	}
-  }
-  async function updateUsers(db){
-	try{
-		const userArr = await MongoDB.getAllUsers(db)
-		let listUsers = ''
-		userArr.forEach(user => {
-			listUsers += `<li>${user}</li>\n`
-		})
-	content = `<h1>All Users</h1>
-	${listUsers}`
-	fs.writeFile(__dirname + '/public/html/allUsers.html', content, err => {
-		if (err) {
-			console.error(err);
-		}
-	});
-		return userArr
-	}
-	catch(e){
-		throw e 
-	}
-  }
-
-  async function updateOrders(db){
-	try{
-		const userArr = await MongoDB.getAllUsers(db)
-		let listUsers = ''
-		userArr.forEach(user => {
-			listUsers += `<li>${user}</li>\n`
-		})
-	content = `<h1>All Users</h1>
-	${listUsers}`
-	fs.writeFile(__dirname + '/public/html/allUsers.html', content, err => {
-		if (err) {
-			console.error(err);
-		}
-	});
-		return userArr
-	}
-	catch(e){
-		throw e 
-	}
-  }
 
   var userInfo = function LoggedUserInfo(res){
 	let sessionId = res.socket.parser.incoming.sessionID
@@ -222,38 +144,90 @@ app.get('/pickMovie',isLoggedIn, (req, res) => {
 });
 
 app.get('/successfulLogin', isLoggedIn, (req, res) => {
-	var passportUserInfo = userInfo(res)
-	//console.log(passportUserInfo.movies)
-	let list = ''
-	passportUserInfo.movies.forEach(movie => {
-		list += `<li>${movie.MovieName} - ${movie.OrderDate}</li>\n`
-	});
-	let content = `<h1>${passportUserInfo.username}'s Movies </h1>
-	${list}`
-	fs.writeFile(__dirname + '/public/html/userMovies.html', content, err => {
-		if (err) {
-			console.error(err);
-		}
-	});
-	if(passportUserInfo.role == 'admin'){
-		res.render('adminSuccessfulLogin.html')
-	}
-	else{
 		res.render('userSuccessfulLogin.html')
-	}	
-	
 });
+
+
+app.get('/userMoviesList', isLoggedIn, (req, res) => {
+	var passportUserInfo = userInfo(res)
+	var currentUser = passportUserInfo.username;
+	(() => {
+		try{
+			MongoDB.getAllUserMovies(currentUser, db).then((userMoviesArr) => {
+				res.send(userMoviesArr)});
+		}
+		catch(e){
+			throw e 
+		}
+	})()
+})
+
+
+
+app.get('/orderList', isLoggedIn, (req, res) => {
+	(() => {
+		try{
+			MongoDB.getAllOrders(db).then((orderArr) => {
+				res.send(orderArr)});
+		}
+		catch(e){
+			throw e 
+		}
+	})()
+});
+
+app.get('/movieList', isLoggedIn, (req, res) => {
+	(() => {
+		try{
+			MongoDB.getAllMovies(db).then((movieArr) => {
+				res.send(movieArr)});
+		}
+		catch(e){
+			throw e 
+		}
+	})()
+});
+
+app.get('/userList', isLoggedIn, (req, res) => {
+	(() => {
+		try{
+			MongoDB.getAllUsers(db).then((userArr) => {
+				res.send(userArr)});
+		}
+		catch(e){
+			throw e 
+		}
+	})()
+});
+
+app.get('/pickaMovie', isLoggedIn, (req, res) => {
+	(() => {
+		try{
+			let user = userInfo(res).username
+			movie = req.query.movie
+			MongoDB.InsertOrder(movie, user, db).then((didOrder) => {
+				res.send(didOrder)});
+		} 
+		catch(e){
+			throw e 
+		}
+	})()
+});
+
 
 app.post('/addUser', isLoggedIn, (req, res) => {
 	(async () => {
 		try{
 			username = req.body.username
 			password = req.body.password
-			role = 'user'
+			if(req.body.role == "on"){
+				role = 'admin'
+			}
+			else{
+				role = 'user'
+			}
 			movies = []
 			const createUser = await MongoDB.createUser(username, password,role, movies,db)
-			updateUsers(db)
-			//if user was added 'createUser' is set to true
 			if(createUser){
 				//ALERT
 			}
@@ -269,8 +243,6 @@ app.post('/removeUser', isLoggedIn, (req, res) => {
 		try{
 			username = req.body.username
 			const removeUser = await MongoDB.removeUser(username, db)
-			updateUsers(db)
-			//if user was added 'removeUser' is set to true
 			if(removeUser){
 				//ALERT
 			}
@@ -286,9 +258,8 @@ app.post('/addMovie', isLoggedIn, (req, res) => {
 		try{
 			movie = req.body["Movie Name"]
 			genre = req.body["Genre"]
-			const addMovie = await MongoDB.addMovie(movie,genre, db)
-			updateMovies(db)
-			//if user was added 'addMovie' is set to true
+			image = req.body["image"]
+			const addMovie = await MongoDB.addMovie(movie, genre, image, db)
 			if(addMovie){
 				//ALERT
 			}
@@ -299,24 +270,6 @@ app.post('/addMovie', isLoggedIn, (req, res) => {
 	  })();
 });
 
-app.post('/pickMovie', isLoggedIn, (req, res) => {
-	(async () => {
-		try{
-			let user = userInfo(res).username
-			movie = req.body["Movie Name"]
-			const insertMovie = await MongoDB.InsertOrder(movie, user, db)
-			//if user was added 'addMovie' is set to true
-			if(insertMovie){
-				//ALERT
-			}
-		}
-		catch(e){
-			throw e 
-		}
-	})()
-});
-
-
 app.post('/login', passport.authenticate('local', {
 	successRedirect: 'successfulLogin',
 	failureRedirect: 'login?error=true',
@@ -326,24 +279,6 @@ app.get('/logout', function (req, res) {
 	req.logout();
 	res.redirect('/');
 });
-
-
-
-
-// getting all the collection of movies, to have all the movies parsed in JSON prepared for manipulations
-app.get('/getMovies', (req, res) => {
-
-    async function myMovies() {
-      await MongoDB.getMoviesCollection().then((result) => {
-		console.log(result);
-		res.send(result)});
-    }
-    myMovies();
-  })
-
-// function showTable(){
-// 	MongoDB.showTable();
-// }
 
 		
 

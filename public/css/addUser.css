@@ -2,20 +2,13 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
-	
-	font-family: 'Fira sans', sans-serif;
 }
-
-body {
-	background-color: #2F4960;
-	background-image: linear-gradient(to bottom right, #2F4960 10%, #102040);
+.checkbox{
+	padding: 10px;
 }
-
-.app {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 100px;
+input#role{
+	width: 20px;
+	height: 20px;
 }
 
 .home {
@@ -25,6 +18,12 @@ body {
 	background-color: #ffffff;
 	border-radius: 16px;
 	text-align: center;
+}
+.app {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100px;
 }
 
 form {
@@ -44,10 +43,6 @@ form h1 {
 	margin-bottom: 30px;
 }
 
-form .form-group {
-	margin-bottom: 30px;
-}
-
 form label {
 	display: block;
 	color:#eee;
@@ -55,14 +50,14 @@ form label {
 	margin-bottom: 5px;
 }
 
-form input {
+form  input:not([type="checkbox"]){
 	appearance: none;
 	background: none;
 	outline: none;
 	border: none;
 }
 
-form input:not([type="submit"]) {
+form input:not([type="submit"]){
 	display: block;
 	width: 100%;
 	padding: 15px;
@@ -74,11 +69,11 @@ form input:not([type="submit"]) {
 	font-size: 18px;
 	font-weight: 300;
 }
-
+/* color of the placeholder */
 form input:not([type="submit"])::placeholder {
 	color: #CCC;
 }
-
+/* Show box as white so text is clear to see, when focused and after typing */
 form input:not([type="submit"]):focus, form input:not([type="submit"]):valid {
 	background-color: #fff;
 	box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);

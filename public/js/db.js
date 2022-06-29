@@ -3,7 +3,6 @@ dotenv.config({ path: './public/config/config.env' })
 const { MONGO_DB_NAME, MONGO_URL_CON_DB } = process.env
 const { MongoClient } = require('mongodb')
 const client = new MongoClient(MONGO_URL_CON_DB, { useNewUrlParser: true, useUnifiedTopology: true})
-const bcrypt = require('bcrypt');
 
 //Generic function for DB connection
 
@@ -21,10 +20,9 @@ function getDate() {
 var db = function connectDB (){
 	console.log("Connecting to DB...")
 	client.connect()
-	var dbo = client.db(MONGO_DB_NAME)
+	let dbo = client.db(MONGO_DB_NAME)
 		if (!dbo) {
 			console.error(`DB Not Found! Failed to Connect`)
-			process.exit(2)
 		}
 		console.log("Connected Successfully to DB!")
 		return dbo;
@@ -101,9 +99,9 @@ const removeUser = async function (username, db) {
 	}
 }
 
-const addMovie = async function (movie,genre, db) {
+const addMovie = async function (movie, genre, image, db) {
 	console.log("Trying to add a movie...")
-	var myobj = { name: movie, Genre: genre}
+	var myobj = { name: movie, Genre: genre, image: image}
 	try{
 		const collectionMovies = db.collection("Movies")
 		const allMovies = collectionMovies.find();
@@ -131,20 +129,6 @@ const addMovie = async function (movie,genre, db) {
 	}
 }
 
-const findUserById = async function (id) {
-	console.log("Trying to Find user by Id...")
-	try{
-		const collectionUsers = db.collection("Users")
-		collectionUsers.findOne({_id: id}, function (err, user) {
-			return user
-		  })
-	}
-	catch(e){
-		console.log(`Failed to Find user with the following id : ${id}`)
-		throw e
-	}
-}
-
 const findUserByName = async function (username, password, done, db) {
 	console.log("Trying to Find user by name...")
 	try{
@@ -162,48 +146,11 @@ const findUserByName = async function (username, password, done, db) {
 			else{
 				return done(null, false, { message: 'Incorrect Password.' })
 			}
-			// bcrypt.compare(password, user.password, function (err, res) {
-			// 	if (err) throw "Error"
-			// 	console.log("Passwords don't match" + res)
-			// 	if (res === false){
-			// 		disconnectDB()
-			// 		console.log("Passwords don't match")
-			// 		return user
-			// 	} 
 		});
-		//   })
 	}
 	catch(e){
 		console.log("Catched an Error")
 		throw e;
-	}
-}
-
-const doesUserExist = async function (username, password,db) {
-	console.log("Trying to find if user exists...")
-	try{
-		const collectionUsers = db.collection("Users")
-
-		const allUsers = collectionUsers.find();
-		let exist = false
-		// Execute the each command, triggers for each document
-		await allUsers.forEach(function(user) {
-			
-			// If the user already exist then do nothing else add
-			if(user.username == username && !exist) {
-				console.log("User already exists ")
-				exist = true
-				return exist
-			}
-		})
-		// Add the user if doesn't exist
-		if(!exist){
-			return exist
-		}
-	}
-	catch(e){
-		console.log('Failed to add user')
-		throw e
 	}
 }
 
@@ -236,7 +183,7 @@ const getAllUsers = async function (db) {
 		let usersArr = []
 		// Execute the each command, triggers for each document
 		await allUsers.forEach(function(user) {
-			usersArr.push(user.username)
+			usersArr.push(user)
 		})
 		// Add the user if doesn't exist
 		return usersArr
@@ -247,45 +194,102 @@ const getAllUsers = async function (db) {
 	}
 }
 
-const InsertOrder = async function (movie,user, db) {
+const getAllOrders = async function (db) {
+	console.log("Getting All Orders...")
+	try{
+		const collectionOrders = db.collection("Orders")
+
+		const allOrders = collectionOrders.find();
+		let ordersArr = []
+		// Execute the each command, triggers for each document
+		await allOrders.forEach(function(order) {
+			ordersArr.push(order)
+		})
+		// Add the user if doesn't exist
+		return ordersArr
+	}
+	catch(e){
+		console.log('Failed to get Orders')
+		throw e
+	}
+}
+
+const getAllUserMovies = async function (user, db) {
+	console.log("Getting All User Movies...")
+	try{
+		const collectionUserMovies = db.collection("Users")
+
+		const currentUser = await collectionUserMovies.findOne({username: user});
+		let movieList = []
+		let movieVar
+		currentUser.movies.forEach(movie => {
+			movieVar = {"MovieName": movie.MovieName,
+						"OrderDate": movie.OrderDate,
+						"image": movie.image }
+			movieList.push(movieVar)
+		});
+		const userMovies = {"username": currentUser.username,
+			 					"movies": movieList
+							}
+		
+		// Add the user if doesn't exist
+		return userMovies
+	}
+	catch(e){
+		console.log('Failed to get Orders')
+		throw e
+	}
+}
+
+const InsertOrder = async function (movie, user, db) {
 	console.log("Inserting Order...")
 	orderDate = getDate()
 	myobjOrders = { MovieName: movie, OrderDate: orderDate, user: user}
-	myobjMovie = { MovieName: movie, OrderDate: orderDate}
+	let didOrder = false
 	try{
 		//-------------------------Check if Movie Exists-------------------------------
-
 		const collectionMovies = db.collection("Movies")
 		const allMovies = collectionMovies.find();
 		let exist = false
+		let movieImage
 		// Execute the each command, triggers for each document
-		await allMovies.forEach(function(movie) {
+		await allMovies.forEach(function(eachMovie) {
 			
-			// If the user already exist then do nothing else add
-			if(movie.name == movie) {
+			// If the Movie already exist then do nothing else add
+			if(eachMovie.name == movie) {
+				console.log(`Found: ${movie}..`)
+				movieImage = eachMovie.image
 				exist = true
 			}
-
 			
 		})
 		//--------------------------------------------------------------
 		if(exist){
-			
-			const collectionOrders = db.collection("Orders")
-
-			const orders = await collectionOrders.insertOne(myobjOrders);
 
 			const collectionUsers = db.collection("Users")
-
-			let userid = await collectionUsers.findOne({username: user})
-			const users = await collectionUsers.updateOne({ _id: userid._id },
-				{ $push: {movies: myobjMovie} });
-
-			console.log(`Movie: ${movie} Ordered`)
+			let currentUser = await collectionUsers.findOne({username: user})
+			const collectionOrders = db.collection("Orders")
+			let hasMovie = false
+			currentUser.movies.forEach(function(myMovie){
+				if(myMovie.MovieName == movie){
+					hasMovie = true
+					console.log("You Aleady have that Movie")
+				}
+			})
+			if(!hasMovie){
+				const orders = await collectionOrders.insertOne(myobjOrders);
+				myobjMovie = { MovieName: movie, OrderDate: orderDate, image: movieImage}
+				const users = await collectionUsers.updateOne({ _id: currentUser._id },
+					{ $push: {movies: myobjMovie} });
+				didOrder = true	
+				console.log(`Movie: ${movie} Ordered`)
+				return didOrder
+			}
+			return didOrder
 		}
 		else{
 			console.log("Movie doesn't exist, Can't order")
-			//Alert
+			return didOrder
 		}
 	}
 	catch(e){
@@ -294,43 +298,4 @@ const InsertOrder = async function (movie,user, db) {
 	}
 }
 
-//function to get all the collection in JSON, parsed:
-
-async function getMoviesCollection(){  
-    await client.connect();
-    const db = client.db("myimdb");
-    let collection = db.collection('Movies');
-	let res = await collection.find({}).toArray();
-    return res;
-    
-  }
-
-const showTable = async function ()  {
-	  fetch('/getMovies')
-		  .then(response => response.text())
-		  .then(data => {
-			  var movieIMg = JSON.parse(data);
-			  var myTables = "";
-			  movieIMg.forEach(element => {
-
-				  myTables += `
-					  <table class="styled-table">
-						  <tr>							  
-							  <td>
-								  <img src="${element.image}" alt="${element.image}" width="150" height="120">      
-							  </td>
-						  </tr>
-						  </table>
-					  `
-
-			  });
-			  document.getElementById("myData").innerHTML = myTables
-		  }
-		  )
-  }
-
-
-
-
-
-module.exports = {db, createUser, removeUser, addMovie, InsertOrder, findUserById, findUserByName , doesUserExist, getAllMovies, getAllUsers,showTable, getMoviesCollection}
+module.exports = {db, createUser, removeUser, addMovie, InsertOrder, findUserByName , getAllUserMovies, getAllMovies, getAllUsers, getAllOrders}

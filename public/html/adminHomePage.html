@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../css/adminHomePage.css">
 
-        <script src="../js/adminFunctions.js"></script>
+        <script src="../js/Functions.js"></script>
         <script src="../../server.js"></script>
       </head>
 <body>
@@ -18,16 +18,16 @@
 
   <div class="bar">
     <a id ="Home" onclick="loadPage(this.id)">Home</a>
-    <a id ="MyMovies" onclick="loadPage(this.id)">My Movies</a>
+    <a id ="MyMovies" onclick="showUserMovies()">My Movies</a>
     <a id ="AddMovie" onclick="loadPage(this.id)">Add a Movie</a>
-    <a id ="AllMovies" onclick="loadPage(this.id)">All Movies</a>
     <a id ="AddUser" onclick="loadPage(this.id)">Add User</a>
     <a id ="RemoveUser" onclick="loadPage(this.id)">Remove User</a>
-    <a id ="AllUsers" onclick="loadPage(this.id)">All Users</a>
+    <a id ="AllMovies" onclick="showMovies()">All Movies</a>
+    <a id ="AllUsers" onclick="showUsers()">All Users</a>
+    <a id ="AllOrders" onclick="showOrders()">All Orders</a>
     <div class="animation start-home"></div>
   </div>
   <div id="renderPage">
-  <div id="myData"></div>
     
   </div>
 </body>

@@ -1,15 +1,13 @@
 {
-  "name": "Movie Picker",
+  "name": "MoviePicker",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "dependencies": {
-    "bcrypt": "^5.0.1",
     "dotenv": "^16.0.1",
     "ejs": "^3.1.8",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
-    "fs": "^0.0.1-security",
     "mongodb": "^4.7.0",
     "nodemon": "^2.0.18",
     "passport": "^0.5.3",
@@ -22,12 +20,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YoavbhGit/WebProjectv2.git"
+    "url": "git+https://github.com/Johnnyohay/Projection.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/YoavbhGit/WebProjectv2/issues"
+    "url": "https://github.com/Johnnyohay/Projection/issues"
   },
-  "homepage": "https://github.com/YoavbhGit/WebProjectv2#readme"
+  "homepage": "https://github.com/Johnnyohay/Projection#readme"
 }
+
+

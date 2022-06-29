@@ -12,7 +12,7 @@
     margin: 27px auto 0;
   
     position: relative;
-    width: 1010px;
+    width: 1170px;
     height: 50px;
     background-color: #34495e;
     border-radius: 8px;
@@ -60,6 +60,9 @@
   a:nth-child(7) {
     width: 160px;
   }
+  a:nth-child(8) {
+    width: 160px;
+  }
   .bar .start-home, a:nth-child(1):hover~.animation {
     width: 100px;
     left: 0;
@@ -93,13 +96,19 @@
   .bar .start-contact, a:nth-child(7):hover~.animation {
     width: 160px;
     left: 850px;
-    background-color: #eab676;
+    background-color: #f31212;
+  }
+  .bar .start-contact, a:nth-child(8):hover~.animation {
+    width: 160px;
+    left: 1010px;
+    background-color: #12f35d;
   }
   
   body {
     font-size: 12px;
     font-family: sans-serif;
     background: #2c3e50;
+    font-family: 'Cherry Swash', cursive;
   }
   h1 {
     margin: 40px 0 40px;

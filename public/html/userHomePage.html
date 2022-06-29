@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../css/userHomePage.css">
 
-        <script src="../js/userFunctions.js"></script>
+        <script src="../js/Functions.js"></script>
         <script src="../../server.js"></script>
       </head>
 <body>
@@ -18,11 +18,8 @@
 
   <div class="bar">
     <a id ="Home" onclick="loadPage(this.id)">Home</a>
-    <a id ="MyMovies" onclick="loadPage(this.id)">My Movies</a>
-    <a id ="AddMovie" onclick="loadPage(this.id)">Add a Movie</a>
-    <a id ="RemoveMovie" onclick="loadPage(this.id)">Remove a Movie</a>
-    <a id ="AllMovies" onclick="loadPage(this.id)">All Movies</a>
-    <div class="animation start-home"></div>
+    <a id ="MyMovies" onclick="showUserMovies()">My Movies</a>
+    <a id ="AllMovies" onclick="showMovies()">All Movies</a>
   </div>
   <div id="renderPage">
     
